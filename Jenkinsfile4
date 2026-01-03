@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Print Message') {
+            steps {
+                echo 'Hello! Build stage executed successfully.'
+            }
+        }
+    }
+
+    post {
+        success {
+            emailext(
+                subject: "Jenkins Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    <p>Build succeeded!</p>
+                    <p>Job: ${env.JOB_NAME}</p>
+                    <p>Build Number: ${env.BUILD_NUMBER}</p>
+                """,
+                to: 'vibin.anto22@gmail..com',
+                mimeType: 'text/html'
+            )
+        }
+
+        failure {
+            emailext(
+                subject: "Jenkins Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build failed. Please check Jenkins console logs.",
+                to: 'vibin.anto22@gmail.com'
+            )
+        }
+    }
+}
+

@@ -18,7 +18,7 @@ pipeline {
                     <p>Job: ${env.JOB_NAME}</p>
                     <p>Build Number: ${env.BUILD_NUMBER}</p>
                 """,
-                to: 'vibin.anto22@gmail..com',
+                to: 'vibin.anto22@gmail.com',
                 mimeType: 'text/html'
             )
         }

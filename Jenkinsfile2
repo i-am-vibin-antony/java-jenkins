@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'qa', 'prod'],
+            description: 'Select the deployment environment'
+        )
+        choice(
+            name: 'PRIORITY',
+            choices: ['high', 'low', 'middle'],
+            description: 'Select the priority'
+        )
+    }
+
+    stages {
+        stage('SCM code') {
+            steps {
+                git url: 'https://github.com/i-am-vibin-antony/java-jenkins.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Publish High Priority') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'prod' && params.PRIORITY == 'high'
+                }
+            }
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar'
+            }
+        }
+
+        stage('Publish Low Priority') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'prod' && params.PRIORITY == 'low'
+                }
+            }
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar'
+            }
+        }
+
+        stage('Publish Middle Priority') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'prod' && params.PRIORITY == 'middle'
+                }
+            }
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar'
+            }
+        }
+    }
+}
+

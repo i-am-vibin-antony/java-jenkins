@@ -1,0 +1,75 @@
+def gitRepoUrl = 'https://github.com/hellokaton/java11-examples.git'
+def mavenGoals = 'clean package'
+def artifactsPath = 'target/*.jar'
+
+pipeline {
+    agent any
+    
+    stages {
+        stage('SCM code') {
+            steps {
+                script {
+                    // Define variables using 'def' inside script block
+                    def branch = 'master'
+                    def repoName = 'java11-examples'
+                    
+                    echo "Cloning repository: ${repoName}"
+                    echo "Branch: ${branch}"
+                    
+                    // CORRECTED: Use named parameters for git step
+                    git url: gitRepoUrl, branch: branch
+                    
+                    // Get commit information
+                    def commitId = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    def commitAuthor = sh(script: 'git log -1 --pretty=format:"%an"', returnStdout: true).trim()
+                    
+                    echo "Commit ID: ${commitId}"
+                    echo "Author: ${commitAuthor}"
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                script {
+                    // Define build variables using 'def'
+                    def buildCommand = "mvn ${mavenGoals}"
+                    def buildStartTime = new Date()
+                    
+                    echo "Starting build..."
+                    echo "Command: ${buildCommand}"
+                    
+                    sh buildCommand
+                    
+                    def buildEndTime = new Date()
+                    def duration = (buildEndTime.time - buildStartTime.time) / 1000
+                    
+                    echo "Build completed in ${duration} seconds"
+                }
+            }
+        }
+        
+        stage('Publish') {
+            steps {
+                script {
+                    // Define publish variables using 'def'
+                    def artifactCount = 0
+                    def publishStatus = 'Success'
+                    
+                    echo "Publishing artifacts..."
+                    echo "Artifact pattern: ${artifactsPath}"
+                    
+                    // Archive artifacts
+                    archiveArtifacts artifacts: artifactsPath, allowEmptyArchive: false
+                    
+                    // Count artifacts (simulated)
+                    def artifacts = sh(script: "ls -1 target/*.jar 2>/dev/null | wc -l", returnStdout: true).trim()
+                    artifactCount = artifacts.toInteger()
+                    
+                    echo "Published ${artifactCount} artifact(s)"
+                    echo "Status: ${publishStatus}"
+                }
+            }
+        }
+    }
+}
